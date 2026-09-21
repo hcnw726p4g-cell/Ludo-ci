@@ -9,71 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    container:
-      image: barichello/godot-ci:4.7.2
-
     steps:
       - name: Télécharger le projet
         uses: actions/checkout@v4
-
-      - name: Préparer le projet
-        run: |
-          unzip -o Ludo_Afrique_Web.zip -d projet
-          cp -r projet/Ludo_Afrique_v3/. .
-          rm -rf projet
-
-      - name: Créer le preset Web
-        run: |
-          cat > export_presets.cfg <<'EOF'
-          [preset.0]
-
-          name="Web"
-          platform="Web"
-          runnable=true
-          dedicated_server=false
-          custom_features=""
-          export_filter="all_resources"
-          include_filter=""
-          exclude_filter=""
-          export_path="build/index.html"
-          patches=PackedStringArray()
-          encryption_include_filters=""
-          encryption_exclude_filters=""
-          encrypt_pck=false
-          encrypt_directory=false
-          script_export_mode=2
-
-          [preset.0.options]
-
-          custom_template/debug=""
-          custom_template/release=""
-          variant/extensions_support=false
-          vram_texture_compression/for_desktop=true
-          vram_texture_compression/for_mobile=false
-          html/export_icon=true
-          html/custom_html_shell=""
-          html/head_include=""
-          html/canvas_resize_policy=2
-          html/focus_canvas_on_start=true
-          html/experimental_virtual_keyboard=false
-          progressive_web_app/enabled=false
-          EOF
-
-      - name: Installer les templates Web Godot
-        run: |
-          mkdir -p /github/home/.local/share/godot/export_templates/4.7.2.stable
-          wget -q https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz -O /tmp/templates.tpz
-          mkdir -p /tmp/templates
-          unzip -q /tmp/templates.tpz -d /tmp/templates
-          cp /tmp/templates/templates/web_nothreads_debug.zip /github/home/.local/share/godot/export_templates/4.7.2.stable/
-          cp /tmp/templates/templates/web_nothreads_release.zip /github/home/.local/share/godot/export_templates/4.7.2.stable/
-
-      - name: Construire le jeu Web
+      - name: Préparer le site
         run: |
           mkdir -p build
-          godot --headless --export-release "Web" build/index.html
-
+          cp web/index.html build/index.html
       - name: Publier le site
         uses: actions/upload-pages-artifact@v3
         with:
@@ -86,17 +28,14 @@ jobs:
       contents: read
       pages: write
       id-token: write
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
-
       - name: Publier sur GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
