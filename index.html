@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Run Côte d’Ivoire 🇨🇮</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;font-family:Arial;background:#87ceeb}#g{height:100%;max-width:900px;margin:auto;position:relative;overflow:hidden;background:linear-gradient(#87ceeb 0 65%,#d6b45b 65%)}#hud{position:absolute;top:12px;left:12px;right:12px;z-index:5;display:flex;justify-content:space-between;color:white;font-size:22px;font-weight:bold;text-shadow:2px 2px #333}#p{position:absolute;left:80px;bottom:105px;width:42px;height:58px;background:linear-gradient(90deg,#f58220 0 33%,#fff 33% 66%,#169b62 66%);border:3px solid #222;border-radius:15px;z-index:3}.o{position:absolute;bottom:105px;width:35px;height:45px;background:#d22;border:3px solid #222;border-radius:7px}.c{position:absolute;width:24px;height:24px;border-radius:50%;background:#ffd21c;border:3px solid #9a6b00}.ground{position:absolute;bottom:0;width:100%;height:105px;background:repeating-linear-gradient(90deg,#168b45 0 45px,#1aa653 45px 90px);border-top:6px solid white}.cover{position:absolute;inset:0;background:#0008;z-index:10;display:grid;place-items:center}.card{background:#fff;padding:28px;border-radius:18px;text-align:center}.card h1{color:#169b62}.card button{padding:14px 25px;border:0;border-radius:12px;background:#169b62;color:#fff;font-size:20px;font-weight:bold}
+</style></head><body><div id="g"><div id="hud"><span>🏆 <b id="s">0</b></span><span>🪙 <b id="m">0</b></span></div><div id="p"></div><div class="ground"></div><div class="cover" id="cover"><div class="card"><h1>Run Côte d’Ivoire 🇨🇮</h1><p>Évite les obstacles et ramasse les pièces.</p><button id="b">JOUER</button><p>Tape l’écran pour sauter</p></div></div></div>
+<script>
+const g=document.querySelector('#g'),p=document.querySelector('#p'),cover=document.querySelector('#cover'),btn=document.querySelector('#b'),score=document.querySelector('#s'),money=document.querySelector('#m');
+let run=false,jump=false,v=0,sc=0,co=0,obs=[],t=0,ct=0,spd=6,last=0;
+function start(){obs.forEach(x=>x.e.remove());obs=[];run=true;jump=false;v=0;sc=co=0;t=ct=0;spd=6;p.style.bottom='105px';cover.style.display='none';last=performance.now();requestAnimationFrame(loop)}
+function hop(){if(run&&!jump){jump=true;v=15}}
+function add(kind){let e=document.createElement('div');e.className=kind;g.appendChild(e);obs.push({e,x:g.clientWidth+20,y:kind==='c'?180+Math.random()*120:105,w:kind==='c'?24:35,h:kind==='c'?24:45,c:kind==='c'})}
+function loop(now){if(!run)return;let d=Math.min((now-last)/16.67,2);last=now;
+if(jump){let y=parseFloat(p.style.bottom)||105;y+=v*d;v-=.85*d;if(y<=105){y=105;jump=false;v=0}p.style.bottom=y+'px'}
+t-=d;ct-=d;if(t<=0){add('o');t=70+Math.random()*55}if(ct<=0){add('c');ct=55+Math.random()*80}
+let pr={x:80,y:g.clientHeight-(parseFloat(p.style.bottom)||105)-58,w:42,h:58};
+obs=obs.filter(x=>{x.x-=spd*d;x.e.style.left=x.x+'px';x.e.style.bottom=x.y+'px';let by=g.clientHeight-x.y-x.h,hit=pr.x<x.x+x.w&&pr.x+pr.w>x.x&&pr.y<by+x.h&&pr.y+pr.h>by;
+if(hit){if(x.c){co++;x.e.remove();return false}else{end();return false}}if(x.x<-60){x.e.remove();return false}return true});
+sc+=Math.floor(d);score.textContent=sc;money.textContent=co;spd+=.001*d;requestAnimationFrame(loop)}
+function end(){run=false;cover.style.display='grid';cover.querySelector('h1').textContent='Fin de partie 😅';cover.querySelector('p').textContent='Score : '+sc+' • 🪙 '+co;btn.textContent='REJOUER'}
+btn.onclick=start;g.addEventListener('pointerdown',e=>{if(run){e.preventDefault();hop()}});document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')hop()});
+</script></body></html>
