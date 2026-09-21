@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     container:
       image: barichello/godot-ci:4.7.2
 
@@ -22,17 +23,8 @@ jobs:
       - name: Configurer Android pour Godot
         run: |
           mkdir -p "$HOME/.config/godot"
-          cat > "$HOME/.config/godot/editor_settings-4.7.tres" <<'EOF'
-          [gd_resource type="EditorSettings" format=3]
-
-          [resource]
-
-          export/android/java_sdk_path = "/usr/lib/jvm/java-17-openjdk-amd64"
-          export/android/android_sdk_path = "/usr/lib/android-sdk"
-          export/android/debug_keystore = "/root/debug.keystore"
-          export/android/debug_keystore_user = "androiddebugkey"
-          export/android/debug_keystore_pass = "android"
-          EOF
+          cp /root/.config/godot/editor_settings-4.7.tres "$HOME/.config/godot/editor_settings-4.7.tres"
+          ls -l "$HOME/.config/godot/editor_settings-4.7.tres"
 
       - name: Créer la configuration Android
         run: |
@@ -76,9 +68,6 @@ jobs:
           package/show_in_android_tv=false
           package/show_in_app_library=true
           package/show_as_launcher_app=false
-          launcher_icons/main_192x192=""
-          launcher_icons/adaptive_foreground_432x432=""
-          launcher_icons/adaptive_background_432x432=""
           graphics/opengl_debug=false
           xr_features/xr_mode=0
           screen/immersive_mode=true
