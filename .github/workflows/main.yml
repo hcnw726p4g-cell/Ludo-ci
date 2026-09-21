@@ -1,4 +1,4 @@
-name: Construire Ludo Afrique
+name: Publier Ludo Afrique Web
 
 on:
   workflow_dispatch:
@@ -14,32 +14,26 @@ jobs:
       - name: Télécharger le projet
         uses: actions/checkout@v4
 
-      - name: Décompresser le jeu
+      - name: Préparer le projet
         run: |
-          unzip -o Ludo_Afrique_v3.zip -d projet
+          unzip -o Ludo_Afrique_Web.zip -d projet
           cp -r projet/Ludo_Afrique_v3/. .
           rm -rf projet
 
-      - name: Configurer Android pour Godot
-        run: |
-          mkdir -p "$HOME/.config/godot"
-          cp /root/.config/godot/editor_settings-4.7.tres "$HOME/.config/godot/editor_settings-4.7.tres"
-          ls -l "$HOME/.config/godot/editor_settings-4.7.tres"
-
-      - name: Créer la configuration Android
+      - name: Créer le preset Web
         run: |
           cat > export_presets.cfg <<'EOF'
           [preset.0]
 
-          name="Android"
-          platform="Android"
+          name="Web"
+          platform="Web"
           runnable=true
           dedicated_server=false
           custom_features=""
           export_filter="all_resources"
           include_filter=""
           exclude_filter=""
-          export_path="Ludo_Afrique.apk"
+          export_path="build/index.html"
           patches=PackedStringArray()
           encryption_include_filters=""
           encryption_exclude_filters=""
@@ -51,43 +45,40 @@ jobs:
 
           custom_template/debug=""
           custom_template/release=""
-          gradle_build/use_gradle_build=false
-          gradle_build/export_format=0
-          architectures/armeabi-v7a=false
-          architectures/arm64-v8a=true
-          architectures/x86=false
-          architectures/x86_64=false
-          version/code=1
-          version/name="1.0"
-          package/unique_name="ci.ludoafrique.game"
-          package/name="Ludo Afrique"
-          package/signed=true
-          package/app_category=2
-          package/retain_data_on_uninstall=false
-          package/exclude_from_recents=false
-          package/show_in_android_tv=false
-          package/show_in_app_library=true
-          package/show_as_launcher_app=false
-          graphics/opengl_debug=false
-          xr_features/xr_mode=0
-          screen/immersive_mode=true
-          screen/support_small=true
-          screen/support_normal=true
-          screen/support_large=true
-          screen/support_xlarge=true
-          user_data_backup/allow=false
-          command_line/extra_args=""
-          apk_expansion/enable=false
-          permissions/custom_permissions=PackedStringArray()
+          variant/extensions_support=false
+          vram_texture_compression/for_desktop=true
+          vram_texture_compression/for_mobile=false
+          html/export_icon=true
+          html/custom_html_shell=""
+          html/head_include=""
+          html/canvas_resize_policy=2
+          html/focus_canvas_on_start=true
+          html/experimental_virtual_keyboard=false
+          progressive_web_app/enabled=false
           EOF
 
-      - name: Construire APK
+      - name: Construire le jeu Web
         run: |
           mkdir -p build
-          godot --headless --export-debug "Android" build/Ludo_Afrique.apk
+          godot --headless --export-release "Web" build/index.html
 
-      - name: Récupérer APK
-        uses: actions/upload-artifact@v4
+      - name: Publier le site
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: Ludo-Afrique-APK
-          path: build/Ludo_Afrique.apk
+          path: build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Publier sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
